@@ -1,0 +1,699 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Petualangan Sistem Pencernaan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: satu kartu panggung bergaya slide, langkah di atas, tombol Kembali/Lanjut di bawah */
+:root{
+  --bg:#e6f6fb; --bg2:#d7f3e6;
+  --card:#ffffff; --fg:#10324d; --muted:#46687e;
+  --blue:#1f7ae0; --blue-d:#1459a8; --green:#27b27f; --green-d:#13825a;
+  --soft-blue:#d8ecfc; --soft-green:#daf5e8; --line:#b7dcee;
+  --sun:#ffc93c; --warn:#fff1d6; --warn-line:#f0b24a; --warn-fg:#6b4208;
+  --ok:#d6f6e5; --ok-line:#34c08a; --ok-fg:#0b5a3b;
+  --btn-fg:#ffffff;
+  --font-display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+  --font-body:'Nunito','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1e2c; --bg2:#0d2a27; --card:#13324a; --fg:#e8f5fb; --muted:#a2c3d5;
+    --blue:#2b73cf; --blue-d:#5aa9ff; --green:#23a373; --green-d:#4ad8a2;
+    --soft-blue:#1b4466; --soft-green:#15453a; --line:#2b5a78;
+    --warn:#4a3a1a; --warn-line:#c98a2c; --warn-fg:#ffe2b0;
+    --ok:#12483a; --ok-line:#2fb583; --ok-fg:#c9f7e3; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1e2c; --bg2:#0d2a27; --card:#13324a; --fg:#e8f5fb; --muted:#a2c3d5;
+  --blue:#2b73cf; --blue-d:#5aa9ff; --green:#23a373; --green-d:#4ad8a2;
+  --soft-blue:#1b4466; --soft-green:#15453a; --line:#2b5a78;
+  --warn:#4a3a1a; --warn-line:#c98a2c; --warn-fg:#ffe2b0;
+  --ok:#12483a; --ok-line:#2fb583; --ok-fg:#c9f7e3; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%) fixed, var(--bg);
+  color:var(--fg); font-family:var(--font-body); font-size:18px; line-height:1.55;
+  padding-block:16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  min-height:100vh;
+}
+.app{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--font-display);line-height:1.15;margin:0;text-wrap:balance}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:4px solid var(--sun);outline-offset:2px}
+
+/* header + steps */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:800;font-size:1.15rem;color:var(--blue-d)}
+.brand .ico{width:40px;height:40px}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.step{
+  border:3px solid var(--line);background:var(--card);border-radius:999px;
+  padding:4px 12px;font-weight:800;font-size:.85rem;color:var(--muted);min-height:36px;
+}
+.step.done{background:var(--soft-green);border-color:var(--green);color:var(--green-d)}
+.step.on{background:var(--blue);border-color:var(--blue);color:var(--btn-fg)}
+
+/* stage */
+.stage{
+  background:var(--card);border:4px solid var(--line);border-radius:32px;
+  box-shadow:0 8px 0 var(--line);padding:clamp(18px,4vw,40px);
+  position:relative;overflow:hidden;min-height:480px;
+}
+.slide{display:none}
+.slide.active{display:block;animation:slideIn .45s ease both}
+@keyframes slideIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.eyebrow{
+  display:inline-block;background:var(--soft-green);color:var(--green-d);
+  font-weight:800;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 14px;border-radius:999px;margin-bottom:12px;
+}
+h2{font-size:clamp(1.7rem,4.5vw,2.4rem);color:var(--blue-d);margin-bottom:10px}
+.lead{color:var(--muted);font-size:1.05rem;max-width:62ch}
+
+/* buttons */
+.btn{
+  border:0;border-radius:18px;padding:12px 24px;font-weight:800;font-size:1.05rem;
+  background:var(--blue);color:var(--btn-fg);box-shadow:0 5px 0 var(--blue-d);
+  transition:transform .12s,box-shadow .12s;min-height:48px;
+}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--blue-d)}
+.btn.green{background:var(--green);box-shadow:0 5px 0 var(--green-d)}
+.btn.green:active{box-shadow:0 1px 0 var(--green-d)}
+.btn.ghost{background:var(--card);color:var(--blue-d);border:3px solid var(--line);box-shadow:0 5px 0 var(--line)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+/* icons */
+.ico{width:64px;height:64px;display:block;flex:none}
+
+/* 1 opening */
+.open{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center}
+.open h1{font-size:clamp(2.2rem,7vw,3.8rem);color:var(--blue-d);margin-bottom:8px}
+.open h1 span{color:var(--green)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.chip{background:var(--soft-blue);color:var(--blue-d);font-weight:800;border-radius:999px;padding:4px 14px;font-size:.95rem}
+.chip.g{background:var(--soft-green);color:var(--green-d)}
+.field{display:flex;flex-direction:column;gap:6px;margin:16px 0 20px;max-width:380px}
+.field label{font-weight:800;color:var(--blue-d)}
+input[type=text],textarea{
+  font:inherit;color:var(--fg);background:var(--card);border:3px solid var(--line);
+  border-radius:16px;padding:10px 14px;width:100%;
+}
+input[type=text]:focus,textarea:focus{border-color:var(--blue);outline:none}
+.mascot{position:relative;display:grid;place-items:center;min-height:260px}
+.mascot .big{width:min(100%,260px);height:auto;aspect-ratio:1;animation:float 3.2s ease-in-out infinite}
+.bubble{position:absolute;border-radius:50%;animation:rise 5s ease-in infinite}
+.bubble.b1{width:22px;height:22px;background:var(--green);left:12%;bottom:10%}
+.bubble.b2{width:14px;height:14px;background:var(--blue);left:78%;bottom:20%;animation-delay:1.5s}
+.bubble.b3{width:30px;height:30px;background:var(--sun);left:66%;bottom:4%;animation-delay:3s}
+.bubble.b4{width:12px;height:12px;background:var(--blue);left:28%;bottom:2%;animation-delay:2.2s}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-14px) rotate(3deg)}}
+@keyframes rise{0%{transform:translateY(0);opacity:0}15%{opacity:.9}100%{transform:translateY(-220px);opacity:0}}
+
+/* 2 tujuan */
+.goal{
+  display:flex;gap:18px;align-items:center;background:var(--soft-blue);border:3px dashed var(--blue);
+  border-radius:24px;padding:20px;margin:18px 0;
+}
+.goal .ico{width:84px;height:84px}
+.goal p{font-family:var(--font-display);font-weight:600;font-size:clamp(1.25rem,3.4vw,1.7rem);color:var(--blue-d);line-height:1.3}
+.todo{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+.todo div{background:var(--soft-green);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.todo b{font-family:var(--font-display);font-size:1.15rem;color:var(--green-d)}
+.todo span{color:var(--muted);font-size:.95rem}
+
+/* 3 materi */
+.path{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:18px 0}
+.organ-btn{
+  position:relative;background:var(--card);border:3px solid var(--line);border-radius:20px;
+  padding:14px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;
+  box-shadow:0 5px 0 var(--line);transition:transform .15s;min-width:0;
+}
+.organ-btn:hover{transform:translateY(-3px)}
+.organ-btn .ico{width:56px;height:56px}
+.organ-btn .nm{font-weight:800;font-size:.85rem;text-align:center;line-height:1.15;overflow-wrap:anywhere}
+.organ-btn .no{
+  position:absolute;top:-10px;left:-6px;width:28px;height:28px;border-radius:50%;
+  background:var(--green);color:#fff;font-weight:800;font-size:.9rem;display:grid;place-items:center;
+}
+.organ-btn.on{border-color:var(--blue);background:var(--soft-blue);box-shadow:0 5px 0 var(--blue)}
+.organ-btn.glow{animation:glow .9s ease both}
+@keyframes glow{0%{transform:scale(1)}40%{transform:scale(1.12) rotate(-3deg)}100%{transform:scale(1)}}
+.detail{
+  display:flex;gap:20px;align-items:center;background:var(--soft-green);border-radius:24px;
+  padding:20px;min-height:170px;
+}
+.detail .ico{width:110px;height:110px;animation:pop .4s ease both}
+.detail h3{font-size:1.6rem;color:var(--green-d);margin-bottom:4px}
+.detail .fun{font-size:1.1rem}
+@keyframes pop{from{transform:scale(.6) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+.hint-line{color:var(--muted);font-size:.95rem;margin-top:10px}
+
+/* 4 aktivitas */
+.slots{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:16px 0 8px}
+.slot{
+  border:3px dashed var(--blue);border-radius:20px;background:var(--soft-blue);
+  min-height:128px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  gap:4px;position:relative;min-width:0;cursor:pointer;
+}
+.slot .no{font-family:var(--font-display);font-weight:800;color:var(--blue-d);font-size:1.1rem}
+.slot.over{background:var(--soft-green);border-color:var(--green)}
+.slot.filled{border-style:solid;background:var(--card)}
+.slot.ok{border-color:var(--ok-line);background:var(--ok);animation:glow .7s ease both}
+.slot.bad{border-color:var(--warn-line);background:var(--warn);animation:shake .5s ease both}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.bank{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:10px;min-height:128px;
+  padding:12px;border-radius:24px;background:var(--soft-green);margin-top:12px;
+}
+.bank.over{outline:3px dashed var(--green)}
+.bank .hint-line{grid-column:1/-1;margin:0;align-self:center}
+.card-o{
+  background:var(--card);border:3px solid var(--line);border-radius:18px;padding:8px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;cursor:grab;
+  box-shadow:0 4px 0 var(--line);min-width:0;width:100%;
+}
+.card-o .ico{width:52px;height:52px}
+.card-o .nm{font-weight:800;font-size:.8rem;text-align:center;line-height:1.1;overflow-wrap:anywhere}
+.card-o.sel{border-color:var(--blue);box-shadow:0 4px 0 var(--blue);transform:translateY(-4px)}
+.slot .card-o{border:0;box-shadow:none;background:transparent;cursor:pointer}
+.msg{
+  margin-top:14px;border-radius:18px;padding:12px 16px;font-weight:700;display:none;
+}
+.msg.show{display:block;animation:pop .35s ease both}
+.msg.ok{background:var(--ok);color:var(--ok-fg);border:3px solid var(--ok-line)}
+.msg.bad{background:var(--warn);color:var(--warn-fg);border:3px solid var(--warn-line)}
+.msg.info{background:var(--soft-blue);color:var(--blue-d);border:3px solid var(--line)}
+
+/* 5 kuis */
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.dots{display:flex;gap:6px}
+.dots i{width:16px;height:16px;border-radius:50%;background:var(--line);display:block}
+.dots i.cur{background:var(--blue);transform:scale(1.2)}
+.dots i.right{background:var(--green)}
+.dots i.wrong{background:var(--warn-line)}
+.qcard{background:var(--soft-blue);border-radius:24px;padding:clamp(16px,3vw,28px)}
+.qcard .q{font-family:var(--font-display);font-weight:600;font-size:clamp(1.3rem,3.6vw,1.8rem);line-height:1.3;color:var(--fg);margin-bottom:18px}
+.tf{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tf .btn{font-size:1.3rem;padding:16px}
+.tf .btn.salah{background:var(--blue);}
+.tf .btn.benar{background:var(--green);box-shadow:0 5px 0 var(--green-d)}
+.tf .btn:disabled{opacity:.5}
+.tf .btn.picked{opacity:1;outline:4px solid var(--sun)}
+.fb{margin-top:16px;border-radius:20px;padding:14px 18px;display:none;gap:14px;align-items:flex-start}
+.fb.show{display:flex;animation:pop .35s ease both}
+.fb.ok{background:var(--ok);border:3px solid var(--ok-line);color:var(--ok-fg)}
+.fb.bad{background:var(--warn);border:3px solid var(--warn-line);color:var(--warn-fg)}
+.fb .big{font-family:var(--font-display);font-weight:800;font-size:1.35rem;margin-bottom:2px}
+.fb svg{width:44px;height:44px;flex:none}
+.fb .star{animation:spin .7s ease both}
+@keyframes spin{from{transform:rotate(-200deg) scale(.2)}to{transform:none}}
+
+/* 6 hasil */
+.result{display:grid;grid-template-columns:.9fr 1.1fr;gap:22px}
+.score{background:var(--soft-green);border-radius:24px;padding:20px;text-align:center}
+.stars{display:flex;justify-content:center;gap:6px;margin:6px 0}
+.stars svg{width:42px;height:42px}
+.score .num{font-family:var(--font-display);font-weight:800;font-size:3rem;color:var(--green-d);line-height:1}
+.recap{list-style:none;padding:0;margin:12px 0 0;display:flex;flex-direction:column;gap:6px;text-align:left}
+.recap li{display:flex;gap:8px;font-size:.9rem;align-items:flex-start}
+.recap b{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:.8rem}
+.recap .y{background:var(--green)}.recap .n{background:var(--warn-line)}
+.reflect h3{font-size:1.3rem;color:var(--blue-d);margin:0 0 8px}
+.faces{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.face{
+  border:3px solid var(--line);background:var(--card);border-radius:20px;padding:10px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:800;font-size:.85rem;text-align:center;
+  box-shadow:0 4px 0 var(--line);
+}
+.face .e{font-size:2rem;line-height:1.1}
+.face.on{border-color:var(--green);background:var(--soft-green);box-shadow:0 4px 0 var(--green)}
+textarea{min-height:90px;resize:vertical;margin:6px 0 12px}
+
+/* footer nav */
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.count{font-weight:800;color:var(--muted)}
+
+/* confetti */
+.confetti{position:fixed;left:50%;top:45%;width:12px;height:12px;border-radius:3px;pointer-events:none;z-index:50;
+  animation:burst 1.3s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes burst{to{transform:translate(var(--x),var(--y)) rotate(var(--r));opacity:0}}
+
+@media (max-width:720px){
+  body{font-size:17px}
+  .open,.result{grid-template-columns:1fr}
+  .mascot{min-height:200px;order:-1}
+  .mascot .big{width:170px}
+  .todo{grid-template-columns:1fr}
+  .path,.slots,.bank{grid-template-columns:repeat(3,1fr)}
+  .step{padding:2px 10px}
+  .step .lbl{display:none}
+  .step.on .lbl{display:inline}
+  .detail{flex-direction:column;text-align:center}
+  .goal{flex-direction:column;text-align:center}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+
+<!-- ikon organ kartun -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-mulut" viewBox="0 0 100 100">
+      <path d="M8 52 Q28 24 50 38 Q72 24 92 52 Q72 86 50 86 Q28 86 8 52Z" fill="#1fa88b"/>
+      <path d="M20 52 Q50 34 80 52 Q50 76 20 52Z" fill="#0f4a73"/>
+      <path d="M27 50 Q50 38 73 50 L70 57 Q50 47 30 57Z" fill="#fff"/>
+      <ellipse cx="50" cy="66" rx="14" ry="7" fill="#7be0b8"/>
+      <path d="M14 46 Q30 32 46 38" stroke="#6fe3c8" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>
+    </symbol>
+    <symbol id="i-kerongkongan" viewBox="0 0 100 100">
+      <rect x="34" y="6" width="32" height="88" rx="16" fill="#3fb6e8"/>
+      <rect x="40" y="10" width="7" height="80" rx="3.5" fill="#8fdcff" opacity=".75"/>
+      <path d="M34 28 H66 M34 72 H66" stroke="#2a8fc0" stroke-width="3" opacity=".6"/>
+      <circle cx="43" cy="46" r="4" fill="#0f2e4a"/><circle cx="57" cy="46" r="4" fill="#0f2e4a"/>
+      <circle cx="44.5" cy="44.5" r="1.4" fill="#fff"/><circle cx="58.5" cy="44.5" r="1.4" fill="#fff"/>
+      <path d="M44 55 Q50 62 56 55" stroke="#0f2e4a" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-lambung" viewBox="0 0 100 100">
+      <path d="M34 8 h18 q6 0 6 8 v10 q32 6 32 38 q0 32 -36 32 q-36 0 -36 -36 q0 -26 20 -34 v-10 q0 -8 -4 -8z" fill="#2f86e0"/>
+      <path d="M26 56 Q24 38 38 30" stroke="#8cc4ff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".8"/>
+      <circle cx="46" cy="60" r="5" fill="#0f2e4a"/><circle cx="68" cy="60" r="5" fill="#0f2e4a"/>
+      <circle cx="47.8" cy="58.2" r="1.7" fill="#fff"/><circle cx="69.8" cy="58.2" r="1.7" fill="#fff"/>
+      <path d="M50 71 Q57 79 64 71" stroke="#0f2e4a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <circle cx="40" cy="70" r="4" fill="#ff9cc0" opacity=".6"/><circle cx="74" cy="70" r="4" fill="#ff9cc0" opacity=".6"/>
+    </symbol>
+    <symbol id="i-usus-halus" viewBox="0 0 100 100">
+      <path d="M22 20 H78 C92 20 92 42 78 42 H22 C8 42 8 64 22 64 H78 C92 64 92 84 78 84 H30" stroke="#22a96e" stroke-width="15" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M22 20 H78 C92 20 92 42 78 42 H22 C8 42 8 64 22 64 H78 C92 64 92 84 78 84 H30" stroke="#7fe0b0" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>
+      <circle cx="42" cy="42" r="3.2" fill="#0f2e4a"/><circle cx="58" cy="42" r="3.2" fill="#0f2e4a"/>
+      <path d="M46 47.5 Q50 51 54 47.5" stroke="#0f2e4a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-usus-besar" viewBox="0 0 100 100">
+      <path d="M20 90 V20 H80 V90" stroke="#1a8f86" stroke-width="18" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M20 90 V20 H80 V90" stroke="#6fd6c8" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".6"/>
+      <path d="M12 36 H28 M12 56 H28 M12 76 H28 M72 36 H88 M72 56 H88 M72 76 H88" stroke="#126d66" stroke-width="3" opacity=".7"/>
+      <circle cx="42" cy="20" r="3.6" fill="#fff"/><circle cx="58" cy="20" r="3.6" fill="#fff"/>
+      <circle cx="42" cy="20.6" r="2" fill="#0f2e4a"/><circle cx="58" cy="20.6" r="2" fill="#0f2e4a"/>
+    </symbol>
+    <symbol id="i-anus" viewBox="0 0 100 100">
+      <circle cx="50" cy="52" r="38" fill="#5fb4ee"/>
+      <circle cx="50" cy="52" r="38" fill="none" stroke="#8fd0ff" stroke-width="4" stroke-dasharray="40 200" stroke-linecap="round" transform="rotate(200 50 52)"/>
+      <circle cx="50" cy="62" r="13" fill="#164f7e"/>
+      <circle cx="39" cy="38" r="4.5" fill="#0f2e4a"/><circle cx="61" cy="38" r="4.5" fill="#0f2e4a"/>
+      <circle cx="40.6" cy="36.4" r="1.5" fill="#fff"/><circle cx="62.6" cy="36.4" r="1.5" fill="#fff"/>
+    </symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z" fill="#ffc93c" stroke="#e0a000" stroke-width="1.2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-star-off" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z" fill="#cfe3ee" stroke="#a9c6d6" stroke-width="1.2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#27b27f"/><path d="M13 25 l8 8 l15 -17" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-idea" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#f0a93a"/><path d="M24 11 a9 9 0 0 0 -5 16.5 V32 h10 v-4.5 A9 9 0 0 0 24 11z" fill="#fff"/><rect x="19" y="34" width="10" height="3.5" rx="1.7" fill="#fff"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><svg class="ico" aria-hidden="true"><use href="#i-lambung"/></svg><span>IPAS · Kelas VI</span></div>
+    <nav class="steps" id="steps" aria-label="Langkah belajar"></nav>
+  </header>
+
+  <main class="stage" id="stage">
+
+    <!-- 1. PEMBUKA -->
+    <section class="slide" id="s0" aria-label="Pembuka">
+      <div class="open">
+        <div>
+          <span class="eyebrow">Media Belajar Interaktif</span>
+          <h1>Petualangan <span>Makanan</span> di Dalam Tubuhku</h1>
+          <p class="lead">Ikuti perjalanan sepotong roti dari mulut sampai keluar dari tubuh. Yuk kenali sistem pencernaan!</p>
+          <div class="chips">
+            <span class="chip">Mata pelajaran: IPAS</span>
+            <span class="chip g">Kelas VI SD</span>
+            <span class="chip">Topik: Sistem Pencernaan</span>
+          </div>
+          <div class="field">
+            <label for="nama">Siapa namamu?</label>
+            <input type="text" id="nama" maxlength="30" placeholder="Tulis namamu di sini" autocomplete="off">
+          </div>
+          <button class="btn green" data-go="1">Mulai Belajar</button>
+        </div>
+        <div class="mascot" aria-hidden="true">
+          <i class="bubble b1"></i><i class="bubble b2"></i><i class="bubble b3"></i><i class="bubble b4"></i>
+          <svg class="ico big"><use href="#i-lambung"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. TUJUAN -->
+    <section class="slide" id="s1" aria-label="Tujuan pembelajaran">
+      <span class="eyebrow">Tujuan Belajar</span>
+      <h2>Apa yang akan kamu capai?</h2>
+      <div class="goal">
+        <svg class="ico" aria-hidden="true"><use href="#i-star"/></svg>
+        <p>Aku dapat menunjukkan sistem pencernaan yang benar, dari mulut sampai anus.</p>
+      </div>
+      <p class="lead">Supaya berhasil, kamu akan melakukan tiga hal seru ini:</p>
+      <div class="todo" style="margin-top:14px">
+        <div><b>1. Kenali organ</b><span>Pelajari nama dan tugas setiap organ pencernaan.</span></div>
+        <div><b>2. Susun urutan</b><span>Seret organ ke kotak sesuai perjalanan makanan.</span></div>
+        <div><b>3. Jawab kuis</b><span>Pilih benar atau salah untuk 5 pernyataan.</span></div>
+      </div>
+    </section>
+
+    <!-- 3. MATERI -->
+    <section class="slide" id="s2" aria-label="Materi inti">
+      <span class="eyebrow">Materi Inti</span>
+      <h2>Perjalanan makanan di dalam tubuh</h2>
+      <p class="lead">Sistem pencernaan mengubah makanan menjadi sari-sari yang bisa dipakai tubuh. Ada 6 organ yang dilewati makanan secara berurutan. Ketuk organ untuk melihat tugasnya.</p>
+      <div class="path" id="path"></div>
+      <div class="detail" id="detail" aria-live="polite"></div>
+      <div class="row" style="margin-top:16px">
+        <button class="btn ghost" id="play">Putar perjalanan makanan</button>
+        <span class="hint-line" style="margin:0">Angka hijau menunjukkan urutan organ.</span>
+      </div>
+    </section>
+
+    <!-- 4. AKTIVITAS -->
+    <section class="slide" id="s3" aria-label="Aktivitas interaktif">
+      <span class="eyebrow">Aktivitas Interaktif</span>
+      <h2>Susun urutan sistem pencernaan</h2>
+      <p class="lead">Seret kartu organ ke kotak 1 sampai 6, mulai dari tempat makanan masuk. Di layar sentuh, ketuk kartu dulu lalu ketuk kotaknya.</p>
+      <div class="slots" id="slots"></div>
+      <div class="bank" id="bank" aria-label="Kartu organ"></div>
+      <div class="row" style="margin-top:16px">
+        <button class="btn green" id="check">Periksa Jawabanku</button>
+        <button class="btn ghost" id="reset">Acak Ulang</button>
+      </div>
+      <div class="msg" id="actMsg" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- 5. KUIS -->
+    <section class="slide" id="s4" aria-label="Kuis">
+      <span class="eyebrow">Kuis Benar atau Salah</span>
+      <div id="quiz"></div>
+    </section>
+
+    <!-- 6. UMPAN BALIK & REFLEKSI -->
+    <section class="slide" id="s5" aria-label="Umpan balik dan refleksi">
+      <span class="eyebrow">Umpan Balik dan Refleksi</span>
+      <div id="final"></div>
+    </section>
+
+  </main>
+
+  <footer class="bar">
+    <button class="btn ghost" id="prev">Kembali</button>
+    <span class="count" id="count"></span>
+    <button class="btn" id="next">Lanjut</button>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var ORGANS=[
+    {id:'mulut',name:'Mulut',fun:'Tempat makanan masuk. Gigi mengunyah makanan, lalu lidah dan air liur melumatkannya agar mudah ditelan.',clue:'Tempat makanan masuk dan dikunyah.'},
+    {id:'kerongkongan',name:'Kerongkongan',fun:'Saluran seperti pipa yang menghubungkan mulut dengan lambung. Makanan yang ditelan didorong turun ke lambung.',clue:'Saluran yang menghubungkan mulut dan lambung.'},
+    {id:'lambung',name:'Lambung',fun:'Kantong berotot yang mengaduk makanan dan mencampurnya dengan cairan lambung sampai menjadi bubur.',clue:'Kantong yang mengaduk makanan menjadi bubur.'},
+    {id:'usus-halus',name:'Usus Halus',fun:'Saluran panjang yang berkelok-kelok. Sari-sari makanan diserap di sini, lalu dibawa darah ke seluruh tubuh.',clue:'Tempat sari makanan diserap, panjang dan berkelok.'},
+    {id:'usus-besar',name:'Usus Besar',fun:'Menyerap air dari sisa makanan. Sisa yang tidak terpakai dibentuk menjadi tinja.',clue:'Menyerap air dari sisa makanan.'},
+    {id:'anus',name:'Anus',fun:'Lubang di ujung saluran pencernaan, tempat tinja dibuang keluar dari tubuh.',clue:'Tempat pembuangan sisa makanan.'}
+  ];
+  var QUIZ=[
+    {t:'Makanan masuk ke tubuh melalui mulut, lalu turun ke kerongkongan.',a:true,why:'Betul. Makanan masuk lewat mulut, lalu ditelan dan turun lewat kerongkongan.'},
+    {t:'Sari-sari makanan paling banyak diserap di usus besar.',a:false,why:'Sari-sari makanan diserap di usus halus. Usus besar bertugas menyerap air dari sisa makanan.'},
+    {t:'Lambung mengaduk makanan sampai menjadi bubur.',a:true,why:'Betul. Lambung mengaduk makanan dan mencampurnya dengan cairan lambung.'},
+    {t:'Urutan yang benar adalah mulut, lambung, kerongkongan, lalu usus halus.',a:false,why:'Kerongkongan ada sebelum lambung. Urutan yang benar: mulut, kerongkongan, lambung, usus halus, usus besar, anus.'},
+    {t:'Sisa makanan yang tidak dibutuhkan tubuh dibuang melalui anus.',a:true,why:'Betul. Sisa makanan keluar dari tubuh melalui anus.'}
+  ];
+  var PRAISE=['Hebat sekali!','Pintar! Jawabanmu tepat.','Keren, kamu benar!','Mantap! Terus semangat!','Luar biasa, kamu paham!'];
+  var LABELS=['Pembuka','Tujuan','Materi','Aktivitas','Kuis','Refleksi'];
+
+  function $(s,r){return (r||document).querySelector(s)}
+  function ico(id){return '<svg class="ico" aria-hidden="true"><use href="#i-'+id+'"/></svg>'}
+  function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var cur=0, visited={0:true}, nama='';
+  var qi=0, answers=[], answered=false, quizDone=false;
+  var reflectLevel=null;
+
+  /* ---------- navigasi ---------- */
+  var stepsEl=$('#steps');
+  LABELS.forEach(function(l,i){
+    var b=el('button','step','<span class="n">'+(i+1)+'</span><span class="lbl"> '+l+'</span>');
+    b.type='button'; b.addEventListener('click',function(){go(i)});
+    stepsEl.appendChild(b);
+  });
+  function go(n){
+    if(n<0||n>5)return;
+    cur=n; visited[n]=true;
+    document.querySelectorAll('.slide').forEach(function(s,i){s.classList.toggle('active',i===n)});
+    document.querySelectorAll('.step').forEach(function(s,i){
+      s.classList.toggle('on',i===n);
+      s.classList.toggle('done',i!==n&&!!visited[i]);
+      s.setAttribute('aria-current',i===n?'step':'false');
+    });
+    $('#prev').disabled=n===0;
+    $('#next').style.visibility=n===5?'hidden':'visible';
+    $('#count').textContent='Bagian '+(n+1)+' dari 6';
+    if(n===5)renderFinal();
+    window.scrollTo({top:0,behavior:reduce?'auto':'smooth'});
+  }
+  $('#prev').addEventListener('click',function(){go(cur-1)});
+  $('#next').addEventListener('click',function(){go(cur+1)});
+  document.querySelectorAll('[data-go]').forEach(function(b){b.addEventListener('click',function(){go(+b.dataset.go)})});
+  $('#nama').addEventListener('input',function(e){nama=e.target.value.trim()});
+
+  /* ---------- konfeti ---------- */
+  function confetti(){
+    if(reduce)return;
+    var cols=['#1f7ae0','#27b27f','#ffc93c','#5fb4ee','#7be0b8'];
+    for(var i=0;i<26;i++){
+      var c=document.createElement('i');c.className='confetti';
+      var ang=Math.random()*Math.PI*2,d=120+Math.random()*220;
+      c.style.setProperty('--x',Math.cos(ang)*d+'px');
+      c.style.setProperty('--y',(Math.sin(ang)*d-60)+'px');
+      c.style.setProperty('--r',(Math.random()*720-360)+'deg');
+      c.style.background=cols[i%cols.length];
+      document.body.appendChild(c);
+      setTimeout(function(n){return function(){n.remove()}}(c),1400);
+    }
+  }
+
+  /* ---------- 3. materi ---------- */
+  var pathEl=$('#path'),detailEl=$('#detail'),selOrgan=0,timer=null;
+  ORGANS.forEach(function(o,i){
+    var b=el('button','organ-btn','<span class="no">'+(i+1)+'</span>'+ico(o.id)+'<span class="nm">'+o.name+'</span>');
+    b.type='button';b.dataset.i=i;
+    b.addEventListener('click',function(){stopPlay();showOrgan(i)});
+    pathEl.appendChild(b);
+  });
+  function showOrgan(i){
+    selOrgan=i;var o=ORGANS[i];
+    pathEl.querySelectorAll('.organ-btn').forEach(function(b,k){
+      b.classList.toggle('on',k===i);
+      if(k===i){b.classList.remove('glow');void b.offsetWidth;b.classList.add('glow')}
+    });
+    detailEl.innerHTML=ico(o.id)+'<div><h3>'+(i+1)+'. '+o.name+'</h3><p class="fun">'+o.fun+'</p></div>';
+  }
+  function stopPlay(){if(timer){clearInterval(timer);timer=null;$('#play').textContent='Putar perjalanan makanan'}}
+  $('#play').addEventListener('click',function(){
+    if(timer){stopPlay();return}
+    var k=0;showOrgan(0);$('#play').textContent='Berhenti';
+    timer=setInterval(function(){
+      k++;if(k>=ORGANS.length){stopPlay();return}
+      showOrgan(k);
+    },2200);
+  });
+  showOrgan(0);
+
+  /* ---------- 4. aktivitas ---------- */
+  var slotsEl=$('#slots'),bankEl=$('#bank'),actMsg=$('#actMsg');
+  var slots,bank,sel=null,checked=false;
+  function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+  function byId(id){return ORGANS.filter(function(o){return o.id===id})[0]}
+  function resetAct(){
+    var order;
+    do{order=shuffle(ORGANS.map(function(o){return o.id}))}
+    while(order.every(function(id,i){return id===ORGANS[i].id}));
+    slots=[null,null,null,null,null,null];bank=order;sel=null;checked=false;
+    showMsg('');renderAct();
+  }
+  function showMsg(txt,type){
+    actMsg.className='msg'+(txt?' show '+type:'');actMsg.textContent=txt;
+  }
+  function cardEl(id,inSlot){
+    var o=byId(id);
+    var c=el('div','card-o'+(sel===id?' sel':''),ico(o.id)+'<span class="nm">'+o.name+'</span>');
+    c.draggable=true;c.tabIndex=0;c.setAttribute('role','button');
+    c.setAttribute('aria-label',o.name+(inSlot?', ketuk untuk mengembalikan':', ketuk untuk memilih'));
+    c.addEventListener('dragstart',function(e){e.dataTransfer.setData('text/plain',id);e.dataTransfer.effectAllowed='move'});
+    function act(ev){
+      ev.stopPropagation();
+      if(inSlot){return}
+      sel=(sel===id)?null:id;renderAct();
+    }
+    c.addEventListener('click',act);
+    c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();act(e)}});
+    return c;
+  }
+  function removeFrom(id){
+    var bi=bank.indexOf(id);if(bi>-1)bank.splice(bi,1);
+    var si=slots.indexOf(id);if(si>-1)slots[si]=null;
+  }
+  function place(id,idx){
+    removeFrom(id);
+    if(slots[idx])bank.push(slots[idx]);
+    slots[idx]=id;sel=null;
+    if(checked){checked=false;showMsg('')}
+    renderAct();
+  }
+  function toBank(id){removeFrom(id);bank.push(id);sel=null;if(checked){checked=false;showMsg('')}renderAct()}
+  function renderAct(marks){
+    slotsEl.innerHTML='';bankEl.innerHTML='';
+    slots.forEach(function(id,i){
+      var s=el('div','slot'+(id?' filled':''),'<span class="no">'+(i+1)+'</span>');
+      s.tabIndex=0;s.setAttribute('role','button');
+      s.setAttribute('aria-label','Kotak '+(i+1)+(id?', berisi '+byId(id).name:', kosong'));
+      if(marks&&id)s.classList.add(marks[i]?'ok':'bad');
+      if(id){
+        var c=cardEl(id,true);s.appendChild(c);
+        c.addEventListener('click',function(ev){ev.stopPropagation();toBank(id)});
+      }
+      function tap(){
+        if(sel){place(sel,i)}
+        else if(id){toBank(id)}
+      }
+      s.addEventListener('click',tap);
+      s.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tap()}});
+      s.addEventListener('dragover',function(e){e.preventDefault();s.classList.add('over')});
+      s.addEventListener('dragleave',function(){s.classList.remove('over')});
+      s.addEventListener('drop',function(e){e.preventDefault();s.classList.remove('over');var d=e.dataTransfer.getData('text/plain');if(d)place(d,i)});
+      slotsEl.appendChild(s);
+    });
+    bank.forEach(function(id){var w=el('div');w.appendChild(cardEl(id,false));bankEl.appendChild(w)});
+    if(!bank.length){bankEl.appendChild(el('p','hint-line','Semua kartu sudah dipasang. Tekan "Periksa Jawabanku".'))}
+  }
+  bankEl.addEventListener('dragover',function(e){e.preventDefault();bankEl.classList.add('over')});
+  bankEl.addEventListener('dragleave',function(){bankEl.classList.remove('over')});
+  bankEl.addEventListener('drop',function(e){e.preventDefault();bankEl.classList.remove('over');var d=e.dataTransfer.getData('text/plain');if(d)toBank(d)});
+  $('#check').addEventListener('click',function(){
+    if(slots.some(function(s){return !s})){showMsg('Isi semua kotak dulu ya, baru diperiksa.','info');return}
+    var marks=slots.map(function(id,i){return id===ORGANS[i].id});
+    var n=marks.filter(Boolean).length;checked=true;renderAct(marks);
+    if(n===6){showMsg('Hebat sekali! Semua urutan benar. Makanan lewat mulut, kerongkongan, lambung, usus halus, usus besar, lalu anus.','ok');confetti()}
+    else{
+      var f=marks.indexOf(false);
+      showMsg(n+' dari 6 kotak sudah benar. Petunjuk untuk kotak '+(f+1)+': '+ORGANS[f].clue+' Ketuk kartu yang salah untuk mengembalikannya, lalu coba lagi.','bad');
+    }
+  });
+  $('#reset').addEventListener('click',resetAct);
+  resetAct();
+
+  /* ---------- 5. kuis ---------- */
+  var quizEl=$('#quiz');
+  function dotsHtml(){
+    var h='';
+    for(var i=0;i<QUIZ.length;i++){
+      var c=answers[i]===undefined?(i===qi?'cur':''):(answers[i]===QUIZ[i].a?'right':'wrong');
+      h+='<i class="'+c+'"></i>';
+    }
+    return h;
+  }
+  function renderQuiz(){
+    var q=QUIZ[qi];answered=false;
+    quizEl.innerHTML=
+      '<div class="qhead"><h2 style="margin:0">Soal '+(qi+1)+' dari '+QUIZ.length+'</h2><div class="dots" aria-hidden="true">'+dotsHtml()+'</div></div>'+
+      '<p class="lead" style="margin-bottom:12px">Baca pernyataan ini. Apakah pernyataannya benar atau salah?</p>'+
+      '<div class="qcard"><p class="q" id="qtext"></p>'+
+      '<div class="tf"><button class="btn benar" data-v="1">BENAR</button><button class="btn salah" data-v="0">SALAH</button></div></div>'+
+      '<div class="fb" id="fb" role="status" aria-live="polite"></div>'+
+      '<div class="row" style="margin-top:16px"><button class="btn" id="qnext" style="display:none"></button></div>';
+    $('#qtext').textContent=q.t;
+    quizEl.querySelectorAll('.tf .btn').forEach(function(b){b.addEventListener('click',function(){answer(b)})});
+  }
+  function answer(btn){
+    if(answered)return;answered=true;
+    var q=QUIZ[qi],val=btn.dataset.v==='1',ok=val===q.a;
+    answers[qi]=val;
+    quizEl.querySelectorAll('.tf .btn').forEach(function(b){b.disabled=true});
+    btn.classList.add('picked');btn.disabled=false;
+    var fb=$('#fb');fb.className='fb show '+(ok?'ok':'bad');
+    if(ok){
+      fb.innerHTML='<svg class="star" aria-hidden="true"><use href="#i-star"/></svg><div><div class="big">'+PRAISE[qi%PRAISE.length]+'</div><div>Jawaban "'+(q.a?'Benar':'Salah')+'" sudah tepat.</div></div>';
+      confetti();
+    }else{
+      fb.innerHTML='<svg aria-hidden="true"><use href="#i-idea"/></svg><div><div class="big">Belum tepat, tidak apa-apa.</div><div>'+q.why+'</div></div>';
+    }
+    quizEl.querySelector('.dots').innerHTML=dotsHtml();
+    var nb=$('#qnext');nb.style.display='';
+    nb.textContent=qi===QUIZ.length-1?'Lihat Hasilku':'Soal Berikutnya';
+    nb.classList.add('green');
+    nb.addEventListener('click',function(){
+      if(qi===QUIZ.length-1){quizDone=true;go(5)}else{qi++;renderQuiz()}
+    });
+    nb.focus({preventScroll:true});
+  }
+  renderQuiz();
+
+  /* ---------- 6. hasil + refleksi ---------- */
+  function renderFinal(){
+    var f=$('#final');
+    if(!quizDone){
+      f.innerHTML='<h2>Kerjakan kuisnya dulu, ya</h2><p class="lead" style="margin-bottom:16px">Hasil dan refleksi muncul setelah kamu menjawab kelima soal.</p><button class="btn green" id="toQuiz">Ke Kuis</button>';
+      $('#toQuiz').addEventListener('click',function(){go(4)});
+      return;
+    }
+    var score=0;answers.forEach(function(a,i){if(a===QUIZ[i].a)score++});
+    var msg=score===5?'Luar biasa! Kamu sudah ahli sistem pencernaan.':score>=3?'Bagus! Sedikit lagi kamu akan sempurna.':'Ayo semangat! Baca materi sekali lagi, lalu coba kuis lagi.';
+    var who=nama?nama:'Teman hebat';
+    var stars='';for(var i=0;i<5;i++)stars+='<svg aria-hidden="true"><use href="#i-'+(i<score?'star':'star-off')+'"/></svg>';
+    var recap='';QUIZ.forEach(function(q,i){
+      var ok=answers[i]===q.a;
+      recap+='<li><b class="'+(ok?'y':'n')+'">'+(ok?'&#10003;':'!')+'</b><span>'+(ok?'Soal '+(i+1)+': tepat.':'Soal '+(i+1)+': '+q.why)+'</span></li>';
+    });
+    f.innerHTML=
+      '<div class="result">'+
+        '<div class="score"><h2 style="font-size:1.5rem;margin-bottom:4px"></h2><div class="stars">'+stars+'</div>'+
+        '<div class="num">'+score+' / 5</div><p style="margin-top:8px;font-weight:700">'+msg+'</p><ul class="recap">'+recap+'</ul></div>'+
+        '<div class="reflect"><h3>Refleksi: seberapa paham kamu?</h3>'+
+          '<div class="faces" role="radiogroup" aria-label="Tingkat pemahaman">'+
+            '<button class="face" role="radio" aria-checked="false" data-l="paham"><span class="e">&#128516;</span>Aku sudah paham</button>'+
+            '<button class="face" role="radio" aria-checked="false" data-l="hampir"><span class="e">&#128578;</span>Hampir paham</button>'+
+            '<button class="face" role="radio" aria-checked="false" data-l="belum"><span class="e">&#129300;</span>Perlu belajar lagi</button>'+
+          '</div>'+
+          '<label for="catatan" style="font-weight:800;color:var(--blue-d)">Satu hal baru yang kupelajari hari ini:</label>'+
+          '<textarea id="catatan" maxlength="200" placeholder="Contoh: sari makanan diserap di usus halus"></textarea>'+
+          '<div class="row"><button class="btn green" id="send">Simpan Refleksi</button><button class="btn ghost" id="again">Ulangi Kuis</button></div>'+
+          '<div class="msg" id="rmsg" role="status" aria-live="polite"></div>'+
+        '</div>'+
+      '</div>';
+    f.querySelector('.score h2').textContent=who+', ini hasilmu!';
+    f.querySelectorAll('.face').forEach(function(b){
+      b.addEventListener('click',function(){
+        reflectLevel=b.dataset.l;
+        f.querySelectorAll('.face').forEach(function(x){var on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-checked',on)});
+      });
+    });
+    $('#send').addEventListener('click',function(){
+      var m=$('#rmsg');
+      if(!reflectLevel){m.className='msg show info';m.textContent='Pilih dulu wajah yang cocok dengan perasaanmu.';return}
+      var t=reflectLevel==='paham'?'Hebat! Coba ceritakan urutan organ pencernaan kepada temanmu.':reflectLevel==='hampir'?'Bagus! Coba main lagi aktivitas urutan organ supaya makin yakin.':'Tidak apa-apa. Buka lagi bagian Materi, lalu coba aktivitas dan kuis sekali lagi.';
+      m.className='msg show ok';m.textContent='Terima kasih, '+who+'! '+t+' Tunjukkan layar ini kepada gurumu.';
+      confetti();
+    });
+    $('#again').addEventListener('click',function(){qi=0;answers=[];quizDone=false;reflectLevel=null;renderQuiz();go(4)});
+  }
+
+  go(0);
+})();
+</script>
+
+</body></html>
